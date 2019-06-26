@@ -21,6 +21,12 @@ public class opportunityReport
 	final double pickupChargePerHH = 1.50;
 	final double processingCostPerTon = 53.58; 
 	
+	///////////////
+	//
+	//////////////
+	
+	OppReport_CityName oppCityNameObject;
+	
 	////////
 	//distBetOpp should be dynamic variable as dist different bet cities
 	// Need changes, currently marking final for verifying the calculations.  
@@ -34,31 +40,30 @@ public class opportunityReport
 	public static void main(String[] args) throws IOException 
 	{
 		opportunityReport oppObject = new opportunityReport();
-		oppObject.identifyLocation();
+		//oppObject.identifyLocation();
 		//oppObject.wasteGeneration(10000);
-		oppObject.processingPricePerTon();
-		oppObject.materialRevenue();
-		oppObject.pickupCharge();
-		oppObject.truckingExpense();
-		oppObject.householdCost();
-		oppObject.procCost();
-		oppObject.netRecycling();
-		oppObject.writeToFile();
+		/*
+		 * oppObject.processingPricePerTon(); oppObject.materialRevenue();
+		 * oppObject.pickupCharge(); oppObject.truckingExpense();
+		 * oppObject.householdCost(); oppObject.procCost(); oppObject.netRecycling();
+		 * oppObject.writeToFile();
+		 */
 	}
 
-	public void identifyLocation()
-	{ 	
-		oppLocation = JOptionPane.showInputDialog("Enter the Opportunity Location");
-		System.out.println(oppLocation);
-		
-		oppCounty = JOptionPane.showInputDialog("Enter the Opportunity County");
-		System.out.println(oppCounty);
-		
-		oppPopulation = Double.parseDouble(JOptionPane.showInputDialog("Enter the Population :"));
-		System.out.println(oppPopulation);
-	}
+	/*
+	 * public void identifyLocation() { oppLocation =
+	 * JOptionPane.showInputDialog("Enter the Opportunity Location");
+	 * System.out.println(oppLocation);
+	 * 
+	 * oppCounty = JOptionPane.showInputDialog("Enter the Opportunity County");
+	 * System.out.println(oppCounty);
+	 * 
+	 * oppPopulation =
+	 * Double.parseDouble(JOptionPane.showInputDialog("Enter the Population :"));
+	 * System.out.println(oppPopulation); }
+	 */
 	
-	public void wasteGeneration(double oppPopulation)
+	public void wasteGeneration(double oppPopulation, String CityName)
 	{
 		wstGenerationTPD = oppPopulation * (wstGenerationRate/2000) * wstDiversionRate;
 		
@@ -66,7 +71,7 @@ public class opportunityReport
 		df.setRoundingMode(RoundingMode.DOWN);
 		wstTPD = Double.parseDouble(df.format(wstGenerationTPD));
 		
-		JOptionPane.showMessageDialog(null, "Waste Generated in " + oppLocation + " is " + wstTPD + " tons per day");
+		JOptionPane.showMessageDialog(null, "Waste Generated in " + CityName + " is " + wstTPD + " tons per day");
 	}
 	
 	public void processingPricePerTon()

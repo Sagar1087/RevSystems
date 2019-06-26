@@ -27,22 +27,23 @@ public class OppReport_CityName extends JFrame {
 	private static JTextField txtFieldOpportunityName;
 	private JLabel lblEnterStateName;
 	private static JTextField txtFieldStateName;
-	public opportunityReport oppReportObject;
+	
+	public static opportunityReport oppReportObject = new opportunityReport(); 	//Object of the class opportunityReport
 
 	Connection aConnection = null;
 	static Statement aStatement = null;
 
 	static ResultSet rsCountyName;
-	ResultSet rsCitiesWithinCounty;
-	ResultSet rsCityPopulation;
+	static ResultSet rsCitiesWithinCounty;
+	static ResultSet rsCityPopulation;
 
 	String JDBC_Driver = "com.mysql.jdbc.Driver";
 	String dbURL = "jdbc:sqlserver://FLEXBIZHTAPP\\SQLEXPRESS:1433;databaseName=USPopulation;integratedSecurity=true";
 	String userName = "CTLIO/Sbhatt";
 
 	static String qryCountyName;
-	String qryCitiesWithinCounty;
-	String qryCityPopulation;
+	static String qryCitiesWithinCounty;
+	static String qryCityPopulation;
 
 	/**
 	 * Launch the application.
@@ -86,50 +87,12 @@ public class OppReport_CityName extends JFrame {
 
 				try {
 					Class.forName(JDBC_Driver);
-					// Connection conn =
-					// DriverManager.getConnection("jdbc:sqlserver://localhost:1433/USPopulation","CTLIO/Sbhatt","");
 
 					aConnection = DriverManager.getConnection(dbURL, userName, "");
 					aStatement = aConnection.createStatement();
 
-					/*
-					 * String sql = "Select * From dbo.City_State_Population Where CityName = '" +
-					 * txtFieldOpportunityName.getText() + "' and StateName='" +
-					 * txtFieldStateName.getText() + "'";
-					 */
-
 					mthCountyName();
-
-					qryCitiesWithinCounty = "  Select CityName, population\r\n" + "  From dbo.CIty_County_State\r\n"
-							+ "  Where CountyName=( Select CountyName As Counties\r\n"
-							+ "  From dbo.CIty_County_State\r\n" + "  Where StateName='" + txtFieldStateName.getText()
-							+ "' and CityName= '" + txtFieldOpportunityName.getText()
-							+ "') and population is not null and StateName = '" + txtFieldStateName.getText() + "'\r\n"
-							+ "  Order by population DESC";
-
-					rsCitiesWithinCounty = aStatement.executeQuery(qryCitiesWithinCounty);
-
-					while (rsCitiesWithinCounty.next()) {
-						String Cities = null;
-						Cities = rsCitiesWithinCounty.getString("CityName");
-						JOptionPane.showMessageDialog(null, "List of cities within the county : " + Cities);
-					}
-
-					qryCityPopulation = "Select population \r\n" + "  From dbo.CIty_County_State\r\n"
-							+ "  Where CountyName = (Select CountyName\r\n" + "  From dbo.CIty_County_State\r\n"
-							+ "  Where StateName='" + txtFieldStateName.getText() + "' and CityName = '"
-							+ txtFieldOpportunityName.getText() + "' " + "  AND population is not null\r\n"
-							+ "  AND StateName = '" + txtFieldStateName.getText() + "'\r\n"
-							+ "  Order by population DESC ";
-
-					rsCityPopulation = aStatement.executeQuery(qryCityPopulation);
-
-					while (rsCityPopulation.next()) {
-						JOptionPane.showMessageDialog(null, "Population of the cities = " + rsCityPopulation);
-						double oppPopulation = rsCityPopulation.getDouble("population");
-						oppReportObject.wasteGeneration(oppPopulation);
-						oppReportObject.processingPricePerTon();
-					}
+					mthCitiesWithinCounty();
 
 				}
 
@@ -196,6 +159,32 @@ public class OppReport_CityName extends JFrame {
 		}
 	}//End of Method mthCountyName
 	
-	
+	public static void mthCitiesWithinCounty() throws HeadlessException, SQLException
+	{
+		String allCitiesList = null; 
+		String Cities = null;
+		double allPopulation=0, cityPopulation = 0;
+		qryCitiesWithinCounty = "  Select CityName, population\r\n" + "  From dbo.CIty_County_State\r\n"
+				+ "  Where CountyName=( Select CountyName As Counties\r\n"
+				+ "  From dbo.CIty_County_State\r\n" + "  Where StateName='" + txtFieldStateName.getText()
+				+ "' and CityName= '" + txtFieldOpportunityName.getText()
+				+ "') and population is not null and StateName = '" + txtFieldStateName.getText() + "'\r\n"
+				+ "  Order by population DESC";
+
+		rsCitiesWithinCounty = aStatement.executeQuery(qryCitiesWithinCounty);
+
+		while (rsCitiesWithinCounty.next()) 
+		{
+			Cities = rsCitiesWithinCounty.getString("CityName");
+			cityPopulation = rsCitiesWithinCounty.getDouble("population");
+			//JOptionPane.showMessageDialog(null, "Population of " + Cities + " is = " + cityPopulation);
+			//allCitiesList += Cities + "\n";
+			
+			oppReportObject.wasteGeneration(cityPopulation, Cities);
+		}
+		
+		//JOptionPane.showMessageDialog(null, "List of cities within the county : " + allCitiesList);
+
+	}//End of method mthCitiesWithinCounty
 
 }// End of Class
