@@ -34,8 +34,8 @@ public class opportunityReport
 	final double distanceBetweenOpportunity = 32;
 	
 	final double truckOperatingCost = 5.32; 
-	final double truckCapacityUnbaled = 15;
-	final double truckCapacityBaled = 21; 
+	final double truckingCostUnbaled = 15;
+	final double truckingCostBaled = 21; 
 	
 	public static void main(String[] args) throws IOException 
 	{
@@ -48,7 +48,7 @@ public class opportunityReport
 		 * oppObject.householdCost(); oppObject.procCost(); oppObject.netRecycling();
 		 * oppObject.writeToFile();
 		 */
-	}
+	}//End of Main method
 
 	/*
 	 * public void identifyLocation() { oppLocation =
@@ -63,80 +63,111 @@ public class opportunityReport
 	 * System.out.println(oppPopulation); }
 	 */
 	
-	public void wasteGeneration(double oppPopulation, String CityName)
+	public void wasteGeneration(double cityPopulation, String CityName)
 	{
-		wstGenerationTPD = oppPopulation * (wstGenerationRate/2000) * wstDiversionRate;
+		wstGenerationTPD = cityPopulation * (wstGenerationRate/2000) * wstDiversionRate;
 		
 		DecimalFormat df = new DecimalFormat("#.##");
 		df.setRoundingMode(RoundingMode.DOWN);
 		wstTPD = Double.parseDouble(df.format(wstGenerationTPD));
 		
-		JOptionPane.showMessageDialog(null, "Waste Generated in " + CityName + " is " + wstTPD + " tons per day");
+		//JOptionPane.showMessageDialog(null, "Waste Generated in " + CityName + " is " + wstTPD + " tons per day");
 	}
 	
-	public void processingPricePerTon()
+	public void processingPricePerTon(String CityName)
 	{
 		processingRevenue = Double.parseDouble(new DecimalFormat("#.##").format(wstGenerationTPD * prcPricePerTon));
 		
-		JOptionPane.showMessageDialog(null, "Processing Revenue is $" + processingRevenue);
+		//JOptionPane.showMessageDialog(null, "Processing Revenue of " + CityName + " is $" + processingRevenue);
 	}
 	
-	public void materialRevenue()
+	public void materialRevenue(String CityName)
 	{
 		materialRevenue = Double.parseDouble(new DecimalFormat("#.##").format(wstGenerationTPD * targetYield * mtrlPricePerTon));
-		JOptionPane.showMessageDialog(null, "Material Revenue generated is $"+ materialRevenue);
+		//JOptionPane.showMessageDialog(null, "Material Revenue generated in" + CityName + " is $" + materialRevenue);
 	}
 	
-	public void pickupCharge()
+	public void pickupCharge(double cityPopulation, String cityName)
 	{
-		pickupCharge = Double.parseDouble(new DecimalFormat("#.##").format((oppPopulation/peoplePerHouse) * (pickupChargePerHH/30)));
-		JOptionPane.showMessageDialog(null, "Pickup charge per House hold $" + pickupCharge + " daily");
+		pickupCharge = Double.parseDouble(new DecimalFormat("#.##").format((cityPopulation/peoplePerHouse) * (pickupChargePerHH)/30));
+		//JOptionPane.showMessageDialog(null, "Pickup charge per House hold in " + cityName + " $" + pickupCharge + " daily");
 	}
 	
-	public void truckingExpense()
+	public void truckingExpense(double distanceBetCities)
 	{
-		truckingExpenseUnbaled = Double.parseDouble(new DecimalFormat("#.##").format((2*distanceBetweenOpportunity*truckOperatingCost)/(wstGenerationTPD)*truckCapacityUnbaled));
-		JOptionPane.showMessageDialog(null, "Trucking expense to transport unbaled material is $" + truckingExpenseUnbaled);
+		truckingExpenseUnbaled = Double.parseDouble(new DecimalFormat("#.##").format((2*distanceBetCities*truckOperatingCost)/truckingCostUnbaled*wstGenerationTPD));
+		//JOptionPane.showMessageDialog(null, "Trucking expense to transport unbaled material is $" + truckingExpenseUnbaled);
 	}
 	
-	public void householdCost()
+	public void householdCost(double cityPopulation)
 	{
-		householdCost = Double.parseDouble(new DecimalFormat("#.##").format((processingRevenue + truckingExpenseUnbaled)/(oppPopulation/peoplePerHouse)*30));
-		JOptionPane.showMessageDialog(null, "House hold cost $" + householdCost);
+		householdCost = Double.parseDouble(new DecimalFormat("#.##").format((processingRevenue + truckingExpenseUnbaled)/((cityPopulation/peoplePerHouse))*30));
+		//JOptionPane.showMessageDialog(null, "House hold cost $" + householdCost);
 	}
 	
 	public void procCost()
 	{
 		processingCost = Double.parseDouble(new DecimalFormat("#.##").format((wstGenerationTPD * processingCostPerTon)));
-		JOptionPane.showMessageDialog(null, "Processing Cost $" + processingCost);
+		//JOptionPane.showMessageDialog(null, "Processing Cost $" + processingCost);
 	}
 	
 	public void netRecycling()
 	{
 		netRecycling = Double.parseDouble(new DecimalFormat("#.##").format(processingRevenue + materialRevenue + pickupCharge - processingCost));
-		JOptionPane.showMessageDialog(null, "Net value of Recycling $" + netRecycling);
+		//JOptionPane.showMessageDialog(null, "Net value of Recycling $" + netRecycling);
 		
 		annualRecycling = Double.parseDouble(new DecimalFormat("#.##").format(netRecycling * 365)); 
-		JOptionPane.showMessageDialog(null, "Annualized Recycling revenue $" + annualRecycling);
+		//JOptionPane.showMessageDialog(null, "Annualized Recycling revenue $" + annualRecycling);
 	}
 	
-	public void writeToFile() throws IOException
+	public void writeToFile(double cityPopulation, String cityName, boolean FC,String Counties) throws IOException
 	{
-		String fileContent="";
+		String fileContent = "";
+		String fileCont = "";
 		
-		fileContent += "Waste Generated in " + oppLocation + " is " + wstTPD + " tons per day " +"\n" +
-						"Processing Revenue is $" + processingRevenue + "\n" +
-						"Material Revenue generated is $"+ materialRevenue + "\n" + 
-						"Pickup charge per House hold $" + pickupCharge + " daily" + "\n" + 
-						"Trucking expense to transport unbaled material is $" + truckingExpenseUnbaled + "\n" + 
-						"House hold cost $" + householdCost + "\n" + 
-						"Processing Cost $" + processingCost + "\n" + 
-						"Net value of Recycling $" + netRecycling + "\n" + 
-						"Annualized Recycling revenue $" + annualRecycling;
+		if(FC == true)
+		{
+			fileContent = "Opportunity Survey of ::::  " + cityName + "\n\n"; 
+			fileContent += 	"City\t County\t Population\t Recyclable Material (TPD)\t Processing Revenue\t Material Revenue\t Pickup Revenue\t Distance1\t Truck expense\t House hold cost\t Processing Cost\t Net Recycling\t Annualized " + "\n\n";
+			//filename = "OppSurveyfor__"+ cityName + ".txt";
+		}
 		
-		FileWriter fw = new FileWriter("OpportunityReport.txt");
+		
+		
+		/*
+		 * fileContent += "City              \t" + cityName +
+		 * "\nPopulation      \t" + cityPopulation +
+		 * "\nRecyclable Material (TPD)   " + wstTPD +"\n" + "Processing Revenue\t$"
+		 * + processingRevenue + "\n" + "Material Revenue  \t$"+ materialRevenue +
+		 * "\n" + "Pickup Revenue    \t$" + pickupCharge + "\n" +
+		 * "Truck expense	   \t$" + truckingExpenseUnbaled + "\n" +
+		 * "House hold cost   \t$" + householdCost + "\n" +
+		 * "Processing Cost   \t$" + processingCost + "\n" +
+		 * "Net Recycling     \t$" + netRecycling + "\n" +
+		 * "Annualized 	     \t$" + annualRecycling + "\n\n";
+		 */
+		
+		//fileContent += 	"City\t Population\t Recyclable Material (TPD)\t Processing Revenue\t Material Revenue\t Pickup Revenue\t Truck expense\t House hold cost\t Processing Cost\t Net Recycling\t Annualized " + "\n\n";
+		
+		fileContent += cityName + "\t"+ Counties +  "\t" + cityPopulation + "\t" + wstTPD +"\t" + processingRevenue +"\t" + materialRevenue +"\t" + pickupCharge +"\t" + oppCityNameObject.distanceBetCities + "\t"+ truckingExpenseUnbaled +"\t"+ householdCost +"\t" + processingCost +"\t" + netRecycling +"\t" + annualRecycling + "\n";
+		
+		FileWriter fw = new FileWriter("OpportunityReport.txt",true);
 		fw.write(fileContent);
 		fw.close();
+	}
+	
+	public double distance(double lat1, double lon1, double lat2, double lon2) {
+		if ((lat1 == lat2) && (lon1 == lon2)) {
+			return 0;
+		}
+		else {
+			double theta = lon1 - lon2;
+			double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
+			dist = Math.acos(dist);
+			dist = Math.toDegrees(dist);
+			dist = dist * 60 * 1.1515;
+			return (dist);
+		}
 	}
 	
 }

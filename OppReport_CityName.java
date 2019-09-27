@@ -1,6 +1,7 @@
 package OpportunityReport;
 
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
@@ -19,6 +20,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 
 public class OppReport_CityName extends JFrame {
@@ -44,6 +46,12 @@ public class OppReport_CityName extends JFrame {
 	static String qryCountyName;
 	static String qryCitiesWithinCounty;
 	static String qryCityPopulation;
+	static double cityLongitude1; 
+	static double cityLatitude1;
+	static double cityLongitude2; 
+	static double cityLatitude2;
+	static double distanceBetCities; 
+	static String Counties = null;
 
 	/**
 	 * Launch the application.
@@ -91,8 +99,15 @@ public class OppReport_CityName extends JFrame {
 					aConnection = DriverManager.getConnection(dbURL, userName, "");
 					aStatement = aConnection.createStatement();
 
+					///////////////////////////////
+					//Calling Methods. 
+					///////////////////////////////
+					
 					mthCountyName();
 					mthCitiesWithinCounty();
+					//mthCentralCity();
+					//mthCitiesMO();
+					JOptionPane.showMessageDialog(null, "Report Generated Successfully");
 
 				}
 
@@ -153,18 +168,19 @@ public class OppReport_CityName extends JFrame {
 		rsCountyName = aStatement.executeQuery(qryCountyName);
 
 		while (rsCountyName.next()) {
-			String Counties = null;
+			
 			Counties = rsCountyName.getString("CountyName");
-			JOptionPane.showMessageDialog(null, "CountyName = " + Counties);
+			JOptionPane.showMessageDialog(null, "County name = " + Counties);
 		}
 	}//End of Method mthCountyName
 	
-	public static void mthCitiesWithinCounty() throws HeadlessException, SQLException
+	public static void mthCitiesWithinCounty() throws HeadlessException, SQLException, IOException
 	{
 		String allCitiesList = null; 
 		String Cities = null;
 		double allPopulation=0, cityPopulation = 0;
-		qryCitiesWithinCounty = "  Select CityName, population\r\n" + "  From dbo.CIty_County_State\r\n"
+		
+		qryCitiesWithinCounty = "  Select CityName, population, Longitude, Latitude \r\n" + "  From dbo.CIty_County_State\r\n"
 				+ "  Where CountyName=( Select CountyName As Counties\r\n"
 				+ "  From dbo.CIty_County_State\r\n" + "  Where StateName='" + txtFieldStateName.getText()
 				+ "' and CityName= '" + txtFieldOpportunityName.getText()
@@ -173,18 +189,204 @@ public class OppReport_CityName extends JFrame {
 
 		rsCitiesWithinCounty = aStatement.executeQuery(qryCitiesWithinCounty);
 
+		////////////////////////
+		//For the first (centered) city to identify all the opportunity Values: 
+		/////////////////////////
+		
+		
+		if(rsCitiesWithinCounty.next()) {
+			cityLatitude1 = rsCitiesWithinCounty.getDouble("Latitude");
+			cityLongitude1 = rsCitiesWithinCounty.getDouble("Longitude");
+			
+			Cities = rsCitiesWithinCounty.getString("CityName");
+			cityPopulation = rsCitiesWithinCounty.getDouble("population");
+			
+			oppReportObject.wasteGeneration(cityPopulation, Cities);
+			oppReportObject.processingPricePerTon(Cities);
+			oppReportObject.materialRevenue(Cities);
+			oppReportObject.pickupCharge(cityPopulation,Cities);
+			
+			//distanceBetCities = Double.parseDouble(new DecimalFormat("#.##").format(oppReportObject.distance(cityLatitude1, cityLongitude1, cityLatitude2, cityLongitude2)));
+			distanceBetCities = 0;
+			oppReportObject.truckingExpense(distanceBetCities);
+			oppReportObject.householdCost(cityPopulation);
+			oppReportObject.procCost();
+			oppReportObject.netRecycling();
+			
+			oppReportObject.writeToFile(cityPopulation, Cities,true, Counties);
+	
+		}
+		
 		while (rsCitiesWithinCounty.next()) 
 		{
 			Cities = rsCitiesWithinCounty.getString("CityName");
 			cityPopulation = rsCitiesWithinCounty.getDouble("population");
+
+			cityLatitude2 = rsCitiesWithinCounty.getDouble("Latitude");
+			cityLongitude2 = rsCitiesWithinCounty.getDouble("Longitude");
+			
 			//JOptionPane.showMessageDialog(null, "Population of " + Cities + " is = " + cityPopulation);
 			//allCitiesList += Cities + "\n";
 			
 			oppReportObject.wasteGeneration(cityPopulation, Cities);
+			oppReportObject.processingPricePerTon(Cities);
+			oppReportObject.materialRevenue(Cities);
+			oppReportObject.pickupCharge(cityPopulation,Cities);
+			
+			distanceBetCities = Double.parseDouble(new DecimalFormat("#.##").format(oppReportObject.distance(cityLatitude1, cityLongitude1, cityLatitude2, cityLongitude2)));
+			
+			oppReportObject.truckingExpense(distanceBetCities);
+			oppReportObject.householdCost(cityPopulation);
+			oppReportObject.procCost();
+			oppReportObject.netRecycling();
+			
+			oppReportObject.writeToFile(cityPopulation, Cities, false, Counties);
 		}
 		
 		//JOptionPane.showMessageDialog(null, "List of cities within the county : " + allCitiesList);
 
 	}//End of method mthCitiesWithinCounty
+	
+	public static void mthCitiesMO() throws HeadlessException, SQLException, IOException
+	{
+		
+		
+		String allCitiesList = null, qrycitiesMO; 
+		String Cities = null,countyMO = null;
+		double allPopulation=0, cityPopulation = 0;
+		
+		
+		qrycitiesMO = "SELECT * \r\n" + 
+				"from dbo.CIty_County_State\r\n" + 
+				"Where StateName='"+txtFieldStateName.getText()+"' And population is not null Order by population desc";
+
+		rsCitiesWithinCounty = aStatement.executeQuery(qrycitiesMO);
+		
+		/*
+		 * qrycountyMO = "Select CountyName \r\n" + "  From dbo.CIty_County_State\r\n" +
+		 * "  Where StateName='" + txtFieldStateName.getText() + "' and CityName = '" +
+		 * txtFieldOpportunityName.getText() + "'";
+		 * 
+		 * rsCountyName = aStatement.executeQuery(qryCountyName);
+		 */
+
+
+		////////////////////////
+		//For the first (centered) city to identify all the opportunity Values: 
+		/////////////////////////
+		
+		
+		if(rsCitiesWithinCounty.next()) {
+			
+			cityLatitude1 = rsCitiesWithinCounty.getDouble("Latitude");
+			cityLongitude1 = rsCitiesWithinCounty.getDouble("Longitude");
+			
+			Cities = rsCitiesWithinCounty.getString("CityName");
+			cityPopulation = rsCitiesWithinCounty.getDouble("population");
+			countyMO = rsCitiesWithinCounty.getString("CountyName");
+			
+			oppReportObject.wasteGeneration(cityPopulation, Cities);
+			oppReportObject.processingPricePerTon(Cities);
+			oppReportObject.materialRevenue(Cities);
+			oppReportObject.pickupCharge(cityPopulation,Cities);
+			
+			//distanceBetCities = Double.parseDouble(new DecimalFormat("#.##").format(oppReportObject.distance(cityLatitude1, cityLongitude1, cityLatitude2, cityLongitude2)));
+			distanceBetCities = 0;
+			oppReportObject.truckingExpense(distanceBetCities);
+			oppReportObject.householdCost(cityPopulation);
+			oppReportObject.procCost();
+			oppReportObject.netRecycling();
+			
+			oppReportObject.writeToFile(cityPopulation, Cities,true, countyMO);
+	
+		}
+		
+		while (rsCitiesWithinCounty.next()) 
+		{
+			Cities = rsCitiesWithinCounty.getString("CityName");
+			cityPopulation = rsCitiesWithinCounty.getDouble("population");
+			countyMO = rsCitiesWithinCounty.getString("CountyName");
+			
+			cityLatitude2 = rsCitiesWithinCounty.getDouble("Latitude");
+			cityLongitude2 = rsCitiesWithinCounty.getDouble("Longitude");
+			
+			//JOptionPane.showMessageDialog(null, "Population of " + Cities + " is = " + cityPopulation);
+			//allCitiesList += Cities + "\n";
+			
+			oppReportObject.wasteGeneration(cityPopulation, Cities);
+			oppReportObject.processingPricePerTon(Cities);
+			oppReportObject.materialRevenue(Cities);
+			oppReportObject.pickupCharge(cityPopulation,Cities);
+			
+			distanceBetCities = Double.parseDouble(new DecimalFormat("#.##").format(oppReportObject.distance(cityLatitude1, cityLongitude1, cityLatitude2, cityLongitude2)));
+			
+			oppReportObject.truckingExpense(distanceBetCities);
+			oppReportObject.householdCost(cityPopulation);
+			oppReportObject.procCost();
+			oppReportObject.netRecycling();
+			
+			oppReportObject.writeToFile(cityPopulation, Cities, false, countyMO);
+		}
+		
+		//JOptionPane.showMessageDialog(null, "List of cities within the county : " + allCitiesList);
+
+	}//End of method mthCitiesMO
+	
+
+	public static void mthCentralCity() throws SQLException, IOException
+	{
+		String qryCentralCity = null, qryAllCitiesMO = null;
+		String citiesMO,countiesMO; 
+		double cityPopulationMO;
+		ResultSet rsCentralCity, rsAllCitiesMO;
+		
+		qryCentralCity = "Select * \r\n" + 
+				"From dbo.CIty_County_State\r\n" + 
+				"where CityName=' " + txtFieldOpportunityName.getText() + " ' and StateName=' " + txtFieldStateName.getText() + " ' ";
+		
+		
+		rsCentralCity = aStatement.executeQuery(qryCentralCity);
+		
+		double centraCityLat1, centralCityLong1, adjCityLat1, adjCityLong1;
+		centraCityLat1 = rsCentralCity.getDouble("Latitude");
+		centralCityLong1 = rsCentralCity.getDouble("Longitude");
+		
+		qryAllCitiesMO = "SELECT * \r\n" + 
+				"from dbo.CIty_County_State\r\n" + 
+				"Where StateName=' " + txtFieldStateName.getText() + " '";
+		
+		rsAllCitiesMO = aStatement.executeQuery(qryAllCitiesMO);
+		
+		while(rsAllCitiesMO.next())
+		{
+			citiesMO = rsAllCitiesMO.getString("CityName");
+			cityPopulationMO = rsAllCitiesMO.getDouble("population");
+			countiesMO = rsAllCitiesMO.getString("CountyName");
+			
+			adjCityLat1 = rsAllCitiesMO.getDouble("Latitude");
+			adjCityLong1 = rsAllCitiesMO.getDouble("Longitude");
+			
+			oppReportObject.wasteGeneration(cityPopulationMO, citiesMO);
+			oppReportObject.processingPricePerTon(citiesMO);
+			
+			oppReportObject.materialRevenue(citiesMO);
+			oppReportObject.pickupCharge(cityPopulationMO,citiesMO);
+			
+			distanceBetCities = Double.parseDouble(new DecimalFormat("#.##").format(oppReportObject.distance(centraCityLat1, centralCityLong1, adjCityLat1, adjCityLong1)));
+			
+			oppReportObject.truckingExpense(distanceBetCities);
+			oppReportObject.householdCost(cityPopulationMO);
+			oppReportObject.procCost();
+			oppReportObject.netRecycling();
+			
+			oppReportObject.writeToFile(cityPopulationMO, citiesMO, false, countiesMO);
+			
+			
+		}//End of while loop inside mthCentralCity
+		
+		
+	}//End of method mthCentralCity()
+	
+	
 
 }// End of Class
