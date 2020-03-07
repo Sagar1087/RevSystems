@@ -7,6 +7,8 @@ import java.text.DecimalFormat;
 
 import javax.swing.JOptionPane;
 
+import CentralCity.CentralCityOpportunityReport.StateWiseCIties;
+
 public class opportunityReport 
 {
 	String oppLocation, oppCounty;
@@ -22,10 +24,11 @@ public class opportunityReport
 	final double processingCostPerTon = 53.58; 
 	
 	///////////////
-	//
+	// Objects
 	//////////////
 	
 	OppReport_CityName oppCityNameObject;
+	CentralCity.CentralCityOpportunityReport.StateWiseCIties aStateWiseCitiesObject;
 	
 	////////
 	//distBetOpp should be dynamic variable as dist different bet cities
@@ -40,28 +43,9 @@ public class opportunityReport
 	public static void main(String[] args) throws IOException 
 	{
 		opportunityReport oppObject = new opportunityReport();
-		//oppObject.identifyLocation();
-		//oppObject.wasteGeneration(10000);
-		/*
-		 * oppObject.processingPricePerTon(); oppObject.materialRevenue();
-		 * oppObject.pickupCharge(); oppObject.truckingExpense();
-		 * oppObject.householdCost(); oppObject.procCost(); oppObject.netRecycling();
-		 * oppObject.writeToFile();
-		 */
+		
 	}//End of Main method
 
-	/*
-	 * public void identifyLocation() { oppLocation =
-	 * JOptionPane.showInputDialog("Enter the Opportunity Location");
-	 * System.out.println(oppLocation);
-	 * 
-	 * oppCounty = JOptionPane.showInputDialog("Enter the Opportunity County");
-	 * System.out.println(oppCounty);
-	 * 
-	 * oppPopulation =
-	 * Double.parseDouble(JOptionPane.showInputDialog("Enter the Population :"));
-	 * System.out.println(oppPopulation); }
-	 */
 	
 	public void wasteGeneration(double cityPopulation, String CityName)
 	{
@@ -120,43 +104,62 @@ public class opportunityReport
 		//JOptionPane.showMessageDialog(null, "Annualized Recycling revenue $" + annualRecycling);
 	}
 	
-	public void writeToFile(double cityPopulation, String cityName, boolean FC,String Counties) throws IOException
+	public void writeToFile(double cityPopulation, String cityName, String State, boolean FC,String Counties, double lati, double longi) throws IOException
 	{
 		String fileContent = "";
 		String fileCont = "";
 		
 		if(FC == true)
 		{
-			fileContent = "Opportunity Survey of ::::  " + cityName + "\n\n"; 
-			fileContent += 	"City\t County\t Population\t Recyclable Material (TPD)\t Processing Revenue\t Material Revenue\t Pickup Revenue\t Distance1\t Truck expense\t House hold cost\t Processing Cost\t Net Recycling\t Annualized " + "\n\n";
+			//fileContent = "Opportunity Survey of ::::  " + cityName + "\n\n"; 
+			fileContent += 	"City\t County\t State\t Population\t Recyclable Material (TPD)\t Processing Revenue\t Material Revenue\t Pickup Revenue\t Distance\t Truck expense\t House hold cost\t Processing Cost\t Net Recycling\t Annualized\t Latitude\t Longitude " + "\n\n";
 			//filename = "OppSurveyfor__"+ cityName + ".txt";
 		}
 		
-		
-		
-		/*
-		 * fileContent += "City              \t" + cityName +
-		 * "\nPopulation      \t" + cityPopulation +
-		 * "\nRecyclable Material (TPD)   " + wstTPD +"\n" + "Processing Revenue\t$"
-		 * + processingRevenue + "\n" + "Material Revenue  \t$"+ materialRevenue +
-		 * "\n" + "Pickup Revenue    \t$" + pickupCharge + "\n" +
-		 * "Truck expense	   \t$" + truckingExpenseUnbaled + "\n" +
-		 * "House hold cost   \t$" + householdCost + "\n" +
-		 * "Processing Cost   \t$" + processingCost + "\n" +
-		 * "Net Recycling     \t$" + netRecycling + "\n" +
-		 * "Annualized 	     \t$" + annualRecycling + "\n\n";
-		 */
-		
-		//fileContent += 	"City\t Population\t Recyclable Material (TPD)\t Processing Revenue\t Material Revenue\t Pickup Revenue\t Truck expense\t House hold cost\t Processing Cost\t Net Recycling\t Annualized " + "\n\n";
-		
-		fileContent += cityName + "\t"+ Counties +  "\t" + cityPopulation + "\t" + wstTPD +"\t" + processingRevenue +"\t" + materialRevenue +"\t" + pickupCharge +"\t" + oppCityNameObject.distanceBetCities + "\t"+ truckingExpenseUnbaled +"\t"+ householdCost +"\t" + processingCost +"\t" + netRecycling +"\t" + annualRecycling + "\n";
+		fileContent += cityName + "\t"+ Counties +  "\t" + State + "\t" + cityPopulation + "\t" + wstTPD +"\t" + processingRevenue +"\t" + materialRevenue +"\t" + pickupCharge +"\t" + oppCityNameObject.distanceBetCities + "\t"+ truckingExpenseUnbaled +"\t"+ householdCost +"\t" + processingCost +"\t" + netRecycling +"\t" + annualRecycling + "\t" + lati + "\t" + longi + "\n";
 		
 		FileWriter fw = new FileWriter("OpportunityReport.txt",true);
 		fw.write(fileContent);
 		fw.close();
 	}
 	
+	
+	public void cenwriteToFile(double cityPopulation, String cityName, String stateName, boolean FC,String Counties, double dist,double firstLatitude, double firstLongitude) throws IOException
+	{
+		String centralfileContent = "";
+		
+		aStateWiseCitiesObject = new StateWiseCIties();
+		
+		
+		  centralfileContent =
+		  "City\t County\t State\t Population\t Recyclable Material (TPD)\t Processing Revenue\t Material Revenue\t Pickup Revenue\t Distance1\t Truck expense\t House hold cost\t Processing Cost\t Net Recycling\t Annualized\t Latitude\t Longitude "
+		  + "\n\n";
+		 
+		
+		centralfileContent += cityName + "\t"+ Counties +  "\t" + stateName + "\t" + cityPopulation + "\t" + wstTPD +"\t" + processingRevenue +"\t" + materialRevenue +"\t" + pickupCharge +"\t" + dist + "\t"+ truckingExpenseUnbaled +"\t"+ householdCost +"\t" + processingCost +"\t" + netRecycling +"\t" + annualRecycling +"\t"+ firstLatitude +"\t"+ firstLongitude+ "\n";
+		
+		FileWriter fw = new FileWriter("CentralCities.txt",true);
+		fw.write(centralfileContent);
+		fw.close();
+	}
+	
+	
+	public void centralwriteToFile(double cityPopulation, String cityName, String stateName, boolean FC,String Counties, double dist,double latitude,double longitude) throws IOException
+	{
+		String centralfileContent = "";
+		
+		aStateWiseCitiesObject = new StateWiseCIties();
+
+		centralfileContent += cityName + "\t"+ Counties +  "\t" + stateName + "\t" + cityPopulation + "\t" + wstTPD +"\t" + processingRevenue +"\t" + materialRevenue +"\t" + pickupCharge +"\t" + dist + "\t"+ truckingExpenseUnbaled +"\t"+ householdCost +"\t" + processingCost +"\t" + netRecycling +"\t" + annualRecycling +"\t"+ latitude +"\t" + longitude + "\n";
+		
+		FileWriter fw = new FileWriter("CentralCities.txt",true);
+		fw.write(centralfileContent);
+		fw.close();
+	}
+	
 	public double distance(double lat1, double lon1, double lat2, double lon2) {
+		/* System.out.println("xxxx"); */
+		
 		if ((lat1 == lat2) && (lon1 == lon2)) {
 			return 0;
 		}
