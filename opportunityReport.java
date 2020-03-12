@@ -1,4 +1,4 @@
-package OpportunityReport;
+package OpportunityReport.RevSystems;
 
 import java.io.FileWriter;
 import java.io.IOException;
