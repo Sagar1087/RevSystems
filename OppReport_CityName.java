@@ -29,8 +29,8 @@ public class OppReport_CityName extends JFrame {
 	private static JTextField txtFieldOpportunityName;
 	private JLabel lblEnterStateName;
 	private static JTextField txtFieldStateName;
-	
-	public static opportunityReport oppReportObject = new opportunityReport(); 	//Object of the class opportunityReport
+
+	public static opportunityReport oppReportObject = new opportunityReport(); // Object of the class opportunityReport
 
 	Connection aConnection = null;
 	static Statement aStatement = null;
@@ -39,25 +39,26 @@ public class OppReport_CityName extends JFrame {
 	static ResultSet rsCitiesWithinCounty;
 	static ResultSet rsCityPopulation;
 
+	
+	  String JDBC_Driver = "com.mysql.jdbc.Driver"; 
+	  String dbURL ="jdbc:sqlserver://FLEXBIZHTAPP\\SQLEXPRESS:1433;databaseName=USPopulation;integratedSecurity=true";
+	  String userName = "CTLIO/Sbhatt";
+	 
+
 	/*
 	 * String JDBC_Driver = "com.mysql.jdbc.Driver"; String dbURL =
-	 * "jdbc:sqlserver://FLEXBIZHTAPP\\SQLEXPRESS:1433;databaseName=USPopulation;integratedSecurity=true";
-	 * String userName = "CTLIO/Sbhatt";
+	 * "jdbc:sqlserver://MERIDIAN-105\\SQLEXPRESS:1433;databaseName=USPopulation2019;integratedSecurity=true";
+	 * String userName = "MERIDIAN-105/Sbhat";
 	 */
-	
-	String JDBC_Driver = "com.mysql.cj.jdbc.Driver";
-	String dbURL = "jdbc:sqlserver://MERIDIAN-105\\SQLEXPRESS:1433;databaseName=USPopulation2019;integratedSecurity=true";
-	String userName = "MERIDIAN-105/Sbhat";
-
 
 	static String qryCountyName;
 	static String qryCitiesWithinCounty;
 	static String qryCityPopulation;
-	static double cityLongitude1; 
+	static double cityLongitude1;
 	static double cityLatitude1;
-	static double cityLongitude2; 
+	static double cityLongitude2;
 	static double cityLatitude2;
-	static double distanceBetCities; 
+	static double distanceBetCities;
 	static String Counties = null;
 
 	/**
@@ -98,31 +99,32 @@ public class OppReport_CityName extends JFrame {
 		JButton btnGenerateReport = new JButton("Generate Report");
 
 		////////////////////////////////////////////////
-		//Action Listener Method to generate Report. Method calls when button pressed.
+		// Action Listener Method to generate Report. Method calls when button pressed.
 		/////////////////////////////////////////////////
 		btnGenerateReport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 
 				try {
-					
-					//For Connecting the SQL Database. 
-					
+
+					// For Connecting the SQL Database.
+
 					/*
 					 * Class.forName(JDBC_Driver); aConnection = DriverManager.getConnection(dbURL,
 					 * userName, ""); aStatement = aConnection.createStatement();
 					 */
-					
+
 					ConnectToSQL();
 
 					///////////////////////////////
-					//Calling Methods. 
+					// Calling Methods.
 					///////////////////////////////
+
+					mthCountyName();
+					mthCitiesWithinCounty();
 					
-					//mthCountyName();
-					//mthCitiesWithinCounty();
-					//mthCentralCity();
-					//mthCitiesMO();
-					//JOptionPane.showMessageDialog(null, "Report Generated Successfully");
+					// mthCentralCity();
+					// mthCitiesMO();
+					// JOptionPane.showMessageDialog(null, "Report Generated Successfully");
 
 				}
 
@@ -175,14 +177,14 @@ public class OppReport_CityName extends JFrame {
 								.addGap(35).addComponent(btnGenerateReport).addContainerGap(107, Short.MAX_VALUE)));
 		contentPane.setLayout(gl_contentPane);
 	}// End of Constructor
-	
+
 	public void ConnectToSQL() throws ClassNotFoundException, SQLException {
-		
+
 		Class.forName(JDBC_Driver);
 		aConnection = DriverManager.getConnection(dbURL, userName, "");
 		aStatement = aConnection.createStatement();
-		
-		JOptionPane.showConfirmDialog(null, "Connect to Local DB");
+
+		JOptionPane.showMessageDialog(null, "Connect to Local DB");
 	}
 
 	public static void mthCountyName() throws SQLException {
@@ -192,167 +194,166 @@ public class OppReport_CityName extends JFrame {
 		rsCountyName = aStatement.executeQuery(qryCountyName);
 
 		while (rsCountyName.next()) {
-			
+
 			Counties = rsCountyName.getString("CountyName");
 			JOptionPane.showMessageDialog(null, "County name = " + Counties);
 		}
-	}//End of Method mthCountyName
-	
-	public static void mthCitiesWithinCounty() throws HeadlessException, SQLException, IOException
-	{
-		String allCitiesList = null; 
-		String Cities = null, state =null;
-		double allPopulation=0, cityPopulation = 0;
-		
-		qryCitiesWithinCounty = "  Select CityName, StateName, population, Longitude, Latitude \r\n" + " from dbo.USPopulation2019\r\n"
-				+ "  Where CountyName=( Select CountyName As Counties\r\n"
+	}// End of Method mthCountyName
+
+	public static void mthCitiesWithinCounty() throws HeadlessException, SQLException, IOException {
+		String allCitiesList = null;
+		String Cities = null, state = null;
+		double allPopulation = 0, cityPopulation = 0;
+
+		qryCitiesWithinCounty = "  Select CityName, StateName, population, Longitude, Latitude \r\n"
+				+ " from dbo.USPopulation2019\r\n" + "  Where CountyName=( Select CountyName As Counties\r\n"
 				+ "  From dbo.USPopulation2019\r\n" + "  Where StateName='" + txtFieldStateName.getText()
 				+ "' and CityName= '" + txtFieldOpportunityName.getText()
-				+ "') and population is not null and population <> 0 and StateName = '" + txtFieldStateName.getText() + "'\r\n"
-				+ "  Order by population DESC";
+				+ "') and population is not null and population <> 0 and StateName = '" + txtFieldStateName.getText()
+				+ "'\r\n" + "  Order by population DESC";
 
 		rsCitiesWithinCounty = aStatement.executeQuery(qryCitiesWithinCounty);
 
 		////////////////////////
-		//For the first (centered) city to identify all the opportunity Values: 
+		// For the first (centered) city to identify all the opportunity Values:
 		/////////////////////////
-		
-		
-		if(rsCitiesWithinCounty.next()) {
+
+		if (rsCitiesWithinCounty.next()) {
 			cityLatitude1 = rsCitiesWithinCounty.getDouble("Latitude");
 			cityLongitude1 = rsCitiesWithinCounty.getDouble("Longitude");
-			
+
 			Cities = rsCitiesWithinCounty.getString("CityName");
 			cityPopulation = rsCitiesWithinCounty.getDouble("population");
 			state = rsCitiesWithinCounty.getString("StateName");
-			
+
 			oppReportObject.wasteGeneration(cityPopulation, Cities);
 			oppReportObject.processingPricePerTon(Cities);
 			oppReportObject.materialRevenue(Cities);
-			oppReportObject.pickupCharge(cityPopulation,Cities);
-			
-			//distanceBetCities = Double.parseDouble(new DecimalFormat("#.##").format(oppReportObject.distance(cityLatitude1, cityLongitude1, cityLatitude2, cityLongitude2)));
+			oppReportObject.pickupCharge(cityPopulation, Cities);
+
+			// distanceBetCities = Double.parseDouble(new
+			// DecimalFormat("#.##").format(oppReportObject.distance(cityLatitude1,
+			// cityLongitude1, cityLatitude2, cityLongitude2)));
 			distanceBetCities = 0;
 			oppReportObject.truckingExpense(distanceBetCities);
 			oppReportObject.householdCost(cityPopulation);
 			oppReportObject.procCost();
 			oppReportObject.netRecycling();
-			
-			oppReportObject.writeToFile(cityPopulation, Cities,state,true, Counties,cityLatitude1,cityLongitude1);
-	
+
+			oppReportObject.writeToFile(cityPopulation, Cities, state, true, Counties, cityLatitude1, cityLongitude1);
+
 		}
-		
-		while (rsCitiesWithinCounty.next()) 
-		{
+
+		while (rsCitiesWithinCounty.next()) {
 			Cities = rsCitiesWithinCounty.getString("CityName");
 			cityPopulation = rsCitiesWithinCounty.getDouble("population");
 
 			cityLatitude2 = rsCitiesWithinCounty.getDouble("Latitude");
 			cityLongitude2 = rsCitiesWithinCounty.getDouble("Longitude");
-			
-			//JOptionPane.showMessageDialog(null, "Population of " + Cities + " is = " + cityPopulation);
-			//allCitiesList += Cities + "\n";
-			
+
+			// JOptionPane.showMessageDialog(null, "Population of " + Cities + " is = " +
+			// cityPopulation);
+			// allCitiesList += Cities + "\n";
+
 			oppReportObject.wasteGeneration(cityPopulation, Cities);
 			oppReportObject.processingPricePerTon(Cities);
 			oppReportObject.materialRevenue(Cities);
-			oppReportObject.pickupCharge(cityPopulation,Cities);
-			
-			distanceBetCities = Double.parseDouble(new DecimalFormat("#.##").format(oppReportObject.distance(cityLatitude1, cityLongitude1, cityLatitude2, cityLongitude2)));
-			
+			oppReportObject.pickupCharge(cityPopulation, Cities);
+
+			distanceBetCities = Double.parseDouble(new DecimalFormat("#.##")
+					.format(oppReportObject.distance(cityLatitude1, cityLongitude1, cityLatitude2, cityLongitude2)));
+
 			oppReportObject.truckingExpense(distanceBetCities);
 			oppReportObject.householdCost(cityPopulation);
 			oppReportObject.procCost();
 			oppReportObject.netRecycling();
-			
-			oppReportObject.writeToFile(cityPopulation, Cities, state,false, Counties,cityLatitude2,cityLongitude2);
+
+			oppReportObject.writeToFile(cityPopulation, Cities, state, false, Counties, cityLatitude2, cityLongitude2);
 		}
-		
-		//JOptionPane.showMessageDialog(null, "List of cities within the county : " + allCitiesList);
 
-	}//End of method mthCitiesWithinCounty
-	
-	public static void mthCitiesMO() throws HeadlessException, SQLException, IOException
-	{
+		// JOptionPane.showMessageDialog(null, "List of cities within the county : " +
+		// allCitiesList);
 
-		String allCitiesList = null, qrycitiesMO; 
-		String Cities = null,countyMO = null;
-		double allPopulation=0, cityPopulation = 0;
-		
-		
-		qrycitiesMO = "SELECT * \r\n" + 
-				"from dbo.USPopulation2019 \r\n" + 
-				"Where StateName='"+txtFieldStateName.getText()+"' And population is not null and population <> 0 Order by population desc";
+	}// End of method mthCitiesWithinCounty
+
+	public static void mthCitiesMO() throws HeadlessException, SQLException, IOException {
+
+		String allCitiesList = null, qrycitiesMO;
+		String Cities = null, countyMO = null;
+		double allPopulation = 0, cityPopulation = 0;
+
+		qrycitiesMO = "SELECT * \r\n" + "from dbo.USPopulation2019 \r\n" + "Where StateName='"
+				+ txtFieldStateName.getText()
+				+ "' And population is not null and population <> 0 Order by population desc";
 
 		rsCitiesWithinCounty = aStatement.executeQuery(qrycitiesMO);
 
 		////////////////////////
-		//For the first (centered) city to identify all the opportunity Values: 
+		// For the first (centered) city to identify all the opportunity Values:
 		/////////////////////////
-		
-		
-		if(rsCitiesWithinCounty.next()) {
-			
+
+		if (rsCitiesWithinCounty.next()) {
+
 			cityLatitude1 = rsCitiesWithinCounty.getDouble("Latitude");
 			cityLongitude1 = rsCitiesWithinCounty.getDouble("Longitude");
-			
+
 			Cities = rsCitiesWithinCounty.getString("CityName");
 			cityPopulation = rsCitiesWithinCounty.getDouble("population");
 			countyMO = rsCitiesWithinCounty.getString("CountyName");
-			
+
 			oppReportObject.wasteGeneration(cityPopulation, Cities);
 			oppReportObject.processingPricePerTon(Cities);
 			oppReportObject.materialRevenue(Cities);
-			oppReportObject.pickupCharge(cityPopulation,Cities);
-			
-			//distanceBetCities = Double.parseDouble(new DecimalFormat("#.##").format(oppReportObject.distance(cityLatitude1, cityLongitude1, cityLatitude2, cityLongitude2)));
+			oppReportObject.pickupCharge(cityPopulation, Cities);
+
+			// distanceBetCities = Double.parseDouble(new
+			// DecimalFormat("#.##").format(oppReportObject.distance(cityLatitude1,
+			// cityLongitude1, cityLatitude2, cityLongitude2)));
 			distanceBetCities = 0;
 			oppReportObject.truckingExpense(distanceBetCities);
 			oppReportObject.householdCost(cityPopulation);
 			oppReportObject.procCost();
 			oppReportObject.netRecycling();
-			
-			//oppReportObject.writeToFile(cityPopulation, Cities,true, countyMO);
-	
+
+			// oppReportObject.writeToFile(cityPopulation, Cities,true, countyMO);
+
 		}
-		
-		while (rsCitiesWithinCounty.next()) 
-		{
+
+		while (rsCitiesWithinCounty.next()) {
 			Cities = rsCitiesWithinCounty.getString("CityName");
 			cityPopulation = rsCitiesWithinCounty.getDouble("population");
 			countyMO = rsCitiesWithinCounty.getString("CountyName");
-			
+
 			cityLatitude2 = rsCitiesWithinCounty.getDouble("Latitude");
 			cityLongitude2 = rsCitiesWithinCounty.getDouble("Longitude");
-			
-			//JOptionPane.showMessageDialog(null, "Population of " + Cities + " is = " + cityPopulation);
-			//allCitiesList += Cities + "\n";
-			
+
+			// JOptionPane.showMessageDialog(null, "Population of " + Cities + " is = " +
+			// cityPopulation);
+			// allCitiesList += Cities + "\n";
+
 			oppReportObject.wasteGeneration(cityPopulation, Cities);
 			oppReportObject.processingPricePerTon(Cities);
 			oppReportObject.materialRevenue(Cities);
-			oppReportObject.pickupCharge(cityPopulation,Cities);
-			
-			distanceBetCities = Double.parseDouble(new DecimalFormat("#.##").format(oppReportObject.distance(cityLatitude1, cityLongitude1, cityLatitude2, cityLongitude2)));
-			
+			oppReportObject.pickupCharge(cityPopulation, Cities);
+
+			distanceBetCities = Double.parseDouble(new DecimalFormat("#.##")
+					.format(oppReportObject.distance(cityLatitude1, cityLongitude1, cityLatitude2, cityLongitude2)));
+
 			oppReportObject.truckingExpense(distanceBetCities);
 			oppReportObject.householdCost(cityPopulation);
 			oppReportObject.procCost();
 			oppReportObject.netRecycling();
-			
-			//oppReportObject.writeToFile(cityPopulation, Cities, false, countyMO);
+
+			// oppReportObject.writeToFile(cityPopulation, Cities, false, countyMO);
 		}
-		
-		//JOptionPane.showMessageDialog(null, "List of cities within the county : " + allCitiesList);
 
-	}//End of method mthCitiesMO
-	
+		// JOptionPane.showMessageDialog(null, "List of cities within the county : " +
+		// allCitiesList);
 
-	public static void mthCentralCity() throws SQLException, IOException
-	{
-		
-	}//End of method mthCentralCity()
-	
-	
+	}// End of method mthCitiesMO
+
+	public static void mthCentralCity() throws SQLException, IOException {
+
+	}// End of method mthCentralCity()
 
 }// End of Class
