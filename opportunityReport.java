@@ -40,12 +40,12 @@ public class opportunityReport
 	final double truckingCostUnbaled = 15;
 	final double truckingCostBaled = 21; 
 	
-	public static void main(String[] args) throws IOException 
-	{
-		opportunityReport oppObject = new opportunityReport();
-		
-	}//End of Main method
-
+	/*
+	 * public static void main(String[] args) throws IOException { opportunityReport
+	 * oppObject = new opportunityReport();
+	 * 
+	 * }//End of Main method
+	 */
 	
 	public void wasteGeneration(double cityPopulation, String CityName)
 	{

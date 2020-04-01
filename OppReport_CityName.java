@@ -39,9 +39,16 @@ public class OppReport_CityName extends JFrame {
 	static ResultSet rsCitiesWithinCounty;
 	static ResultSet rsCityPopulation;
 
-	String JDBC_Driver = "com.mysql.jdbc.Driver";
-	String dbURL = "jdbc:sqlserver://FLEXBIZHTAPP\\SQLEXPRESS:1433;databaseName=USPopulation;integratedSecurity=true";
-	String userName = "CTLIO/Sbhatt";
+	/*
+	 * String JDBC_Driver = "com.mysql.jdbc.Driver"; String dbURL =
+	 * "jdbc:sqlserver://FLEXBIZHTAPP\\SQLEXPRESS:1433;databaseName=USPopulation;integratedSecurity=true";
+	 * String userName = "CTLIO/Sbhatt";
+	 */
+	
+	String JDBC_Driver = "com.mysql.cj.jdbc.Driver";
+	String dbURL = "jdbc:sqlserver://MERIDIAN-105\\SQLEXPRESS:1433;databaseName=USPopulation2019;integratedSecurity=true";
+	String userName = "MERIDIAN-105/Sbhat";
+
 
 	static String qryCountyName;
 	static String qryCitiesWithinCounty;
@@ -100,19 +107,22 @@ public class OppReport_CityName extends JFrame {
 					
 					//For Connecting the SQL Database. 
 					
-					Class.forName(JDBC_Driver);
-					aConnection = DriverManager.getConnection(dbURL, userName, "");
-					aStatement = aConnection.createStatement();
+					/*
+					 * Class.forName(JDBC_Driver); aConnection = DriverManager.getConnection(dbURL,
+					 * userName, ""); aStatement = aConnection.createStatement();
+					 */
+					
+					ConnectToSQL();
 
 					///////////////////////////////
 					//Calling Methods. 
 					///////////////////////////////
 					
-					mthCountyName();
-					mthCitiesWithinCounty();
+					//mthCountyName();
+					//mthCitiesWithinCounty();
 					//mthCentralCity();
 					//mthCitiesMO();
-					JOptionPane.showMessageDialog(null, "Report Generated Successfully");
+					//JOptionPane.showMessageDialog(null, "Report Generated Successfully");
 
 				}
 
@@ -165,6 +175,15 @@ public class OppReport_CityName extends JFrame {
 								.addGap(35).addComponent(btnGenerateReport).addContainerGap(107, Short.MAX_VALUE)));
 		contentPane.setLayout(gl_contentPane);
 	}// End of Constructor
+	
+	public void ConnectToSQL() throws ClassNotFoundException, SQLException {
+		
+		Class.forName(JDBC_Driver);
+		aConnection = DriverManager.getConnection(dbURL, userName, "");
+		aStatement = aConnection.createStatement();
+		
+		JOptionPane.showConfirmDialog(null, "Connect to Local DB");
+	}
 
 	public static void mthCountyName() throws SQLException {
 		qryCountyName = "Select CountyName \r\n" + " from dbo.USPopulation2019\r\n" + "  Where StateName='"
